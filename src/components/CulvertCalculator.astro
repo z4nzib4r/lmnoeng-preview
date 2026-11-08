@@ -1,0 +1,1313 @@
+---
+import { MATERIALS, PRESETS, UNITS, type FieldId, type Kind } from '../lib/culvert';
+
+const goals = [
+  { id: 'flow', label: 'Flow & velocity' },
+  { id: 'depth', label: 'Water depth' },
+  { id: 'diameter', label: 'Diameter' },
+  { id: 'slope', label: 'Slope' },
+  { id: 'roughness', label: "Manning's n" },
+];
+
+const si = PRESETS.si;
+const fields: { id: FieldId; label: string; sym: string; kind?: Kind; value: string; fixed?: string }[] = [
+  { id: 'Q', label: 'Discharge', sym: 'Q', kind: 'flow', value: '1.5' },
+  { id: 'V', label: 'Velocity', sym: 'V', kind: 'velocity', value: '2' },
+  { id: 'd', label: 'Diameter', sym: 'd', kind: 'length', value: '1.2' },
+  { id: 'y', label: 'Water depth', sym: 'y', kind: 'length', value: '0.7' },
+  { id: 'T', label: 'Top width', sym: 'T', kind: 'length', value: '1.18' },
+  { id: 'ratio', label: 'Relative depth', sym: 'y/d', value: '0.6' },
+];
+
+const rows: { key: string; label: string; sym: string; kind?: Kind; fixed?: string }[] = [
+  { key: 'Q', label: 'Discharge', sym: 'Q', kind: 'flow' },
+  { key: 'V', label: 'Velocity', sym: 'V', kind: 'velocity' },
+  { key: 'y', label: 'Water depth', sym: 'y', kind: 'length' },
+  { key: 'd', label: 'Diameter', sym: 'd', kind: 'length' },
+  { key: 'ratio', label: 'Relative depth', sym: 'y/d' },
+  { key: 'T', label: 'Top width', sym: 'T', kind: 'length' },
+  { key: 'A', label: 'Flow area', sym: 'A', kind: 'area' },
+  { key: 'P', label: 'Wetted perimeter', sym: 'P', kind: 'length' },
+  { key: 'R', label: 'Hydraulic radius', sym: 'R', kind: 'length' },
+  { key: 'theta', label: 'Fullness angle', sym: 'θ', fixed: '°' },
+  { key: 'F', label: 'Froude number', sym: 'F' },
+  { key: 'n', label: 'Manning roughness', sym: 'n' },
+  { key: 'S', label: 'Slope', sym: 'S', fixed: 'm/m' },
+];
+
+const groups = ['Metals', 'Non-metals'] as const;
+const defaultMaterial = MATERIALS.findIndex((m) => m.name === 'Unfinished concrete');
+---
+
+<form class="tool" data-culvert novalidate>
+  <section class="panel inputs" aria-label="Inputs">
+    <div class="panel-head">
+      <h2>Inputs</h2>
+      <fieldset class="seg small">
+        <legend class="sr">Unit system</legend>
+        <label><input type="radio" name="system" value="si" checked /><span>SI</span></label>
+        <label><input type="radio" name="system" value="us" /><span>US</span></label>
+      </fieldset>
+    </div>
+
+    <fieldset class="goals">
+      <legend>What do you want to find?</legend>
+      <div class="goal-list">
+        {
+          goals.map((g, i) => (
+            <label>
+              <input type="radio" name="goal" value={g.id} checked={i === 0} />
+              <span>{g.label}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="basis" data-group="known" hidden>
+      <legend>Based on</legend>
+      <div class="seg">
+        <label><input type="radio" name="known" value="Q" checked /><span>Discharge</span></label>
+        <label><input type="radio" name="known" value="V" /><span>Velocity</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="basis" data-group="measure">
+      <legend>Measured by</legend>
+      <div class="seg">
+        <label><input type="radio" name="measure" value="depth" checked /><span>Water depth</span></label>
+        <label><input type="radio" name="measure" value="width" /><span>Top width</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="basis" data-group="branch" hidden>
+      <legend>The pipe is</legend>
+      <div class="seg">
+        <label><input type="radio" name="branch" value="lower" checked /><span>Half full or less</span></label>
+        <label><input type="radio" name="branch" value="upper" /><span>More than half full</span></label>
+      </div>
+    </fieldset>
+
+    <div class="fields">
+      {
+        fields.map((f) => (
+          <div class="field" data-field={f.id}>
+            <label for={`f-${f.id}`}>
+              {f.label} <em>{f.sym}</em>
+            </label>
+            <div class="input">
+              <input id={`f-${f.id}`} type="number" inputmode="decimal" step="any" value={f.value} />
+              {f.kind && (
+                <select aria-label={`${f.label} unit`} data-unit={f.kind}>
+                  {Object.keys(UNITS[f.kind]).map((u) => (
+                    <option selected={u === si[f.kind!]}>{u}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </div>
+        ))
+      }
+
+      <div class="field wide" data-field="n">
+        <label for="f-material">Roughness <em>n</em></label>
+        <div class="pair">
+          <div class="input">
+            <select id="f-material" class="material" aria-label="Culvert material" data-material>
+              <option value="">Custom value</option>
+              {
+                groups.map((group) => (
+                  <optgroup label={group}>
+                    {MATERIALS.map((m, i) =>
+                      m.group === group ? (
+                        <option value={String(i)} selected={i === defaultMaterial}>
+                          {m.name}
+                        </option>
+                      ) : null,
+                    )}
+                  </optgroup>
+                ))
+              }
+            </select>
+          </div>
+          <div class="input n-value">
+            <input id="f-n" type="number" inputmode="decimal" step="any" value="0.014" aria-label="Manning's n" />
+          </div>
+        </div>
+        <p class="hint" data-range hidden></p>
+      </div>
+
+      <div class="field wide" data-field="S">
+        <label for="f-S">Slope <em>S</em></label>
+        <div class="input">
+          <input id="f-S" type="number" inputmode="decimal" step="any" value="0.002" />
+          <i data-slope-unit>m/m</i>
+        </div>
+      </div>
+    </div>
+
+    <div class="tools">
+      <button type="button" class="link" data-copy>Copy results</button>
+      <button type="button" class="link" data-reset>Reset</button>
+      <span class="status" role="status" data-copy-status></span>
+    </div>
+  </section>
+
+  <section class="panel results" aria-label="Results">
+    <div class="strip">
+      <div class="headline" data-headline>
+        <span data-headline-label>Discharge Q</span>
+        <strong>
+          <output data-headline-value>—</output>
+          <select aria-label="Result unit" data-headline-unit></select>
+        </strong>
+      </div>
+      <dl class="stats">
+        <div data-stat="0"><dt></dt><dd><output></output> <small></small></dd></div>
+        <div data-stat="1"><dt></dt><dd><output></output> <small></small></dd></div>
+        <div data-stat="2"><dt></dt><dd><output></output> <small></small></dd></div>
+      </dl>
+    </div>
+
+    <p class="alert" role="alert" data-alert hidden></p>
+
+    <div class="picker" data-picker hidden>
+      <p data-picker-text></p>
+      <div class="seg dark">
+        <button type="button" data-pick="0" aria-pressed="true"></button>
+        <button type="button" data-pick="1" aria-pressed="false"></button>
+      </div>
+    </div>
+
+    <div class="figure">
+      <div class="xsec">
+        <svg viewBox="0 0 290 320" role="img" aria-label="Cross-section of the culvert showing the current water level">
+          <defs>
+            <linearGradient id="culvert-water" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#5cc3ff" stop-opacity="0.95"></stop>
+              <stop offset="1" stop-color="#1f8ef1" stop-opacity="0.85"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="156" cy="148" r="128" fill="#f6f8fa"></circle>
+          <path data-water fill="url(#culvert-water)"></path>
+          <circle cx="156" cy="148" r="128" fill="none" stroke="#0b1b2b" stroke-width="4"></circle>
+          <line data-level x1="0" x2="290" stroke="#0b1b2b" stroke-width="1" stroke-dasharray="3 4"></line>
+          <path d="M20 20V276M15 20H25M15 276H25" fill="none" stroke="#7b8b9c" stroke-width="1"></path>
+          <g font-family="JetBrains Mono, monospace" font-size="12" fill="#0b1b2b">
+            <text data-label-d transform="translate(11 148) rotate(-90)" text-anchor="middle"></text>
+            <text data-label-t text-anchor="middle"></text>
+            <text data-label-y></text>
+          </g>
+          <line data-y-dim x1="156" x2="156" y2="276" stroke="#0b1b2b" stroke-width="1.5"></line>
+        </svg>
+      </div>
+
+      <div class="chart">
+        <div class="plot-wrap" data-plot-wrap>
+          <svg class="plot" data-plot height="320" tabindex="0" role="group" aria-label="Discharge and velocity relative to a full pipe, by depth ratio. The same values are in the table below."></svg>
+          <div class="tip" data-tip hidden>
+            <span class="tip-depth">y/d <b data-tip-r></b></span>
+            <span><i class="key q"></i><b data-tip-q></b> Q / Q<sub>full</sub></span>
+            <span><i class="key v"></i><b data-tip-v></b> V / V<sub>full</sub></span>
+          </div>
+        </div>
+        <ul class="legend" aria-hidden="true">
+          <li><i class="key q"></i>Discharge, Q / Q<sub>full</sub></li>
+          <li><i class="key v"></i>Velocity, V / V<sub>full</sub></li>
+        </ul>
+      </div>
+    </div>
+    <p class="caption">
+      <span data-drag-hint>Click the chart to set the water depth. </span>Discharge peaks at y/d = <span data-peak-q></span>, and velocity at y/d = <span data-peak-v></span>, so a nearly full pipe carries more than a full one.
+    </p>
+
+    <dl class="all">
+      {
+        rows.map((r) => (
+          <div data-row={r.key}>
+            <dt>
+              {r.label} <em>{r.sym}</em>
+            </dt>
+            <dd>
+              <output>—</output>
+              {r.kind ? (
+                <select aria-label={`${r.label} unit`} data-row-unit={r.kind}>
+                  {Object.keys(UNITS[r.kind]).map((u) => (
+                    <option selected={u === si[r.kind!]}>{u}</option>
+                  ))}
+                </select>
+              ) : (
+                <small data-fixed={r.key}>{r.fixed ?? ''}</small>
+              )}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+</form>
+
+<style>
+  .tool {
+    display: grid;
+    grid-template-columns: minmax(0, 390px) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  .inputs {
+    padding: 24px;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  h2 {
+    font-size: 22px;
+  }
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  legend,
+  .field > label {
+    display: block;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .goals {
+    margin-top: 18px;
+  }
+  .goal-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .goal-list label,
+  .seg label {
+    position: relative;
+    cursor: pointer;
+  }
+  .goal-list input,
+  .seg input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .goal-list span {
+    display: block;
+    padding: 7px 13px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--surface);
+    transition:
+      background 0.15s,
+      color 0.15s,
+      border-color 0.15s;
+  }
+  .goal-list label:hover span {
+    border-color: var(--water);
+  }
+  .goal-list input:checked + span {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .goal-list input:focus-visible + span,
+  .seg input:focus-visible + span {
+    outline: 2px solid var(--water);
+    outline-offset: 2px;
+  }
+  .basis {
+    margin-top: 14px;
+  }
+  .seg {
+    display: inline-flex;
+    padding: 3px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .seg span,
+  .seg button {
+    display: block;
+    border: 0;
+    background: transparent;
+    font: 600 13px var(--font-sans);
+    color: var(--muted);
+    padding: 6px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .seg input:checked + span {
+    background: var(--ink);
+    color: #fff;
+  }
+  fieldset.seg legend {
+    margin: 0;
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .field em {
+    font-family: var(--font-mono);
+    font-style: normal;
+    color: var(--water);
+  }
+  .input {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--paper);
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+  }
+  .input:focus-within {
+    border-color: var(--water);
+    box-shadow: 0 0 0 3px rgba(31, 142, 241, 0.15);
+  }
+  .field.bad .input {
+    border-color: #c62828;
+    box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.12);
+  }
+  .input input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font: 500 16px var(--font-mono);
+    color: var(--text);
+    padding: 10px 12px;
+    outline: none;
+  }
+  .input select {
+    border: 0;
+    background: transparent;
+    font: 500 13px var(--font-mono);
+    color: var(--muted);
+    padding: 10px 8px;
+    outline: none;
+    cursor: pointer;
+    max-width: 112px;
+  }
+  .input select.material {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    font: 500 14px var(--font-sans);
+    color: var(--text);
+    padding: 11px 10px;
+  }
+  .input i {
+    font-style: normal;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    padding-right: 12px;
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px;
+    gap: 8px;
+  }
+  .hint {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .link {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: 600 14px var(--font-sans);
+    color: var(--water);
+    cursor: pointer;
+  }
+  .link:hover {
+    text-decoration: underline;
+  }
+  .status {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .results {
+    overflow: hidden;
+  }
+  .strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px 32px;
+    background: var(--ink);
+    color: #fff;
+    padding: 22px 24px;
+  }
+  .headline span {
+    display: block;
+    font-size: 13px;
+    color: var(--muted-light);
+  }
+  .headline strong {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: clamp(32px, 4.4vw, 44px);
+    line-height: 1.15;
+    font-weight: 500;
+    color: var(--water-2);
+  }
+  .headline select,
+  .all select {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    font: 500 13px var(--font-mono);
+    cursor: pointer;
+    padding: 2px 0;
+    outline-offset: 2px;
+  }
+  .headline select {
+    color: var(--muted-light);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+  .headline select option,
+  .all select option {
+    color: var(--text);
+  }
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin: 0;
+  }
+  .stats dt {
+    font-size: 12px;
+    color: var(--muted-light);
+  }
+  .stats dd {
+    margin: 2px 0 0;
+    font-family: var(--font-mono);
+    font-size: 17px;
+  }
+  .stats small {
+    font-size: 12px;
+    color: var(--muted-light);
+  }
+  .alert {
+    margin: 0;
+    padding: 12px 24px;
+    background: #fdecea;
+    color: #8c1d18;
+    font-size: 14.5px;
+    font-weight: 500;
+  }
+  .picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 20px;
+    padding: 12px 24px;
+    background: var(--water-soft);
+    font-size: 14px;
+  }
+  .picker button {
+    font-family: var(--font-mono);
+  }
+  .picker button[aria-pressed='true'] {
+    background: var(--ink);
+    color: #fff;
+  }
+  .picker .seg {
+    background: #fff;
+  }
+  .figure {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    padding: 22px 24px 0 8px;
+  }
+  .xsec svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .chart {
+    position: relative;
+    min-width: 0;
+  }
+  .legend {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 20px;
+    margin: 0;
+    padding: 0 0 0 44px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend sub,
+  .tip sub {
+    font-size: 0.75em;
+    margin-left: -4px;
+  }
+  .key {
+    display: inline-block;
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    flex: none;
+  }
+  .key.q {
+    background: #1f8ef1;
+  }
+  .key.v {
+    background: #c2410c;
+  }
+  .plot-wrap {
+    position: relative;
+  }
+  .plot {
+    display: block;
+    width: 100%;
+    cursor: crosshair;
+    touch-action: pan-y;
+  }
+  .plot:focus-visible {
+    outline-offset: 0;
+  }
+  .tip {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    gap: 3px;
+    padding: 8px 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .tip span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tip b {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    color: var(--text);
+  }
+  .tip-depth {
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--line);
+  }
+  .caption {
+    padding: 6px 24px 0;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .all {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 32px;
+    margin: 12px 0 0;
+    padding: 6px 24px 18px;
+  }
+  .all > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .all > div.solved dt,
+  .all > div.solved output {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .all > div.solved output {
+    color: #0b63b5;
+  }
+  .all dt {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .all em {
+    font-family: var(--font-mono);
+    font-style: normal;
+    color: var(--water);
+  }
+  .all dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 14.5px;
+    white-space: nowrap;
+  }
+  .all select,
+  .all small {
+    color: var(--muted);
+    font-size: 12px;
+    margin-left: 4px;
+    font-family: var(--font-mono);
+  }
+  .all select {
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 1040px) {
+    .tool {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 680px) {
+    .inputs {
+      padding: 18px;
+    }
+    .figure {
+      grid-template-columns: 1fr;
+      padding: 18px 16px 0 8px;
+      justify-items: stretch;
+    }
+    .xsec {
+      max-width: 290px;
+      margin-inline: auto;
+      width: 100%;
+    }
+    .all {
+      grid-template-columns: 1fr;
+      padding-inline: 18px;
+    }
+    .strip,
+    .picker,
+    .alert {
+      padding-inline: 18px;
+    }
+    .caption {
+      padding-inline: 18px;
+    }
+  }
+</style>
+
+<script>
+  import {
+    MATERIALS,
+    PRESETS,
+    UNITS,
+    format,
+    peaks,
+    ratioFromTheta,
+    relativeFlow,
+    requiredFields,
+    solve,
+    type Branch,
+    type Failure,
+    type FieldId,
+    type Goal,
+    type Kind,
+    type Known,
+    type Measure,
+    type Solution,
+  } from '../lib/culvert';
+
+  const root = document.querySelector<HTMLFormElement>('[data-culvert]')!;
+  const $ = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  const $$ = <T extends Element = HTMLElement>(s: string) => [...root.querySelectorAll<T>(s)];
+  const radio = <T extends string>(name: string) =>
+    $<HTMLInputElement>(`input[name="${name}"]:checked`).value as T;
+
+  const FIELD_IDS: FieldId[] = ['Q', 'V', 'd', 'y', 'T', 'ratio', 'n', 'S'];
+  const LABELS: Record<FieldId, string> = {
+    Q: 'Discharge',
+    V: 'Velocity',
+    d: 'Diameter',
+    y: 'Water depth',
+    T: 'Top width',
+    ratio: 'Relative depth',
+    n: 'Roughness',
+    S: 'Slope',
+  };
+
+  const fields = Object.fromEntries(
+    FIELD_IDS.map((id) => {
+      const wrap = $(`[data-field="${id}"]`);
+      return [
+        id,
+        {
+          wrap,
+          input: wrap.querySelector<HTMLInputElement>('input')!,
+          unit: wrap.querySelector<HTMLSelectElement>('select[data-unit]'),
+        },
+      ];
+    }),
+  ) as Record<
+    FieldId,
+    { wrap: HTMLElement; input: HTMLInputElement; unit: HTMLSelectElement | null }
+  >;
+
+  const material = $<HTMLSelectElement>('[data-material]');
+  const rangeHint = $('[data-range]');
+  const alertBox = $('[data-alert]');
+  const picker = $('[data-picker]');
+  const headlineUnit = $<HTMLSelectElement>('[data-headline-unit]');
+
+  type RowKey = keyof Solution;
+  const rowKeys = $$('[data-row]').map((el) => el.dataset.row as RowKey);
+  const rowUnit = (k: RowKey) => $<HTMLSelectElement>(`[data-row="${k}"] select`) as HTMLSelectElement | null;
+
+  const HEADLINE: Record<Goal, RowKey> = {
+    flow: 'Q',
+    depth: 'y',
+    diameter: 'd',
+    slope: 'S',
+    roughness: 'n',
+  };
+  const ROW_LABEL = (k: RowKey) => $(`[data-row="${k}"] dt`).textContent!.replace(/\s+/g, ' ').trim();
+
+  let pick = 0;
+  let last: Solution | null = null;
+  let current: Solution | null = null;
+  let alternate: Solution | null = null;
+  let drawnTheta: number | null = null;
+  let tween = 0;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const tidy = (x: number) => String(Number(x.toPrecision(6)));
+
+  // ---- reading and displaying values
+
+  function readSI(id: FieldId) {
+    const { input, unit } = fields[id];
+    const value = input.valueAsNumber;
+    if (!unit) return value;
+    return value * UNITS[unit.dataset.unit as Kind][unit.value];
+  }
+
+  function writeSI(id: FieldId, si: number) {
+    const { input, unit } = fields[id];
+    input.value = tidy(unit ? si / UNITS[unit.dataset.unit as Kind][unit.value] : si);
+  }
+
+  function shown(k: RowKey, s: Solution) {
+    if (k === 'theta') return (s.theta * 180) / Math.PI;
+    const select = rowUnit(k);
+    return select ? s[k] / UNITS[select.dataset.rowUnit as Kind][select.value] : s[k];
+  }
+
+  const unitOf = (k: RowKey) =>
+    rowUnit(k)?.value ?? $(`[data-fixed="${k}"]`).textContent ?? '';
+
+  // ---- form state
+
+  function syncMaterial() {
+    const n = fields.n.input.valueAsNumber;
+    const selected = MATERIALS[Number(material.value)];
+    if (material.value === '' || !selected || selected.n !== n) {
+      const match = MATERIALS.findIndex((m) => m.n === n);
+      material.value = match >= 0 ? String(match) : '';
+    }
+    const m = material.value === '' ? null : MATERIALS[Number(material.value)];
+    rangeHint.hidden = !m?.range;
+    if (m?.range) rangeHint.textContent = `Published range ${m.range}. Midpoint shown; edit it to suit your pipe.`;
+  }
+
+  function syncVisibility(seed: boolean) {
+    const goal = radio<Goal>('goal');
+    const measure = radio<Measure>('measure');
+    const required = requiredFields(goal, radio<Known>('known'), measure);
+    $('[data-group="known"]').hidden = goal === 'flow';
+    $('[data-group="measure"]').hidden = goal !== 'flow';
+    $('[data-group="branch"]').hidden = goal !== 'flow' || measure !== 'width';
+
+    for (const id of FIELD_IDS) {
+      const visible = required.includes(id);
+      const { wrap } = fields[id];
+      // Carry the last answer into newly shown fields so the same pipe stays on screen.
+      if (seed && visible && wrap.hidden && last) writeSI(id, last[id]);
+      wrap.hidden = !visible;
+    }
+    if (seed && last && measure === 'width') {
+      $<HTMLInputElement>(`input[name="branch"][value="${last.ratio > 0.5 ? 'upper' : 'lower'}"]`).checked = true;
+    }
+    syncMaterial();
+    $('[data-drag-hint]').hidden = !canSetDepth();
+  }
+
+  const canSetDepth = () => radio<Goal>('goal') === 'flow' && radio<Measure>('measure') === 'depth';
+
+  function failureText(f: Failure) {
+    switch (f.code) {
+      case 'invalid':
+        return `Enter a number for ${LABELS[f.field].toLowerCase()}.`;
+      case 'nonpositive':
+        return `${LABELS[f.field]} must be greater than zero.`;
+      case 'ratio':
+        return 'Water depth must be less than the diameter. This calculator covers partially full flow.';
+      case 'width':
+        return 'Top width cannot be larger than the diameter.';
+      case 'capacity': {
+        const isQ = f.field === 'Q';
+        const k: Kind = isQ ? 'flow' : 'velocity';
+        const unit = fields[f.field].unit!.value;
+        const max = format(f.max / UNITS[k][unit]);
+        return `${isQ ? 'This pipe carries' : 'Velocity in this pipe reaches'} at most ${max} ${unit} in uniform flow, at y/d = ${format(f.atRatio, 3)}. Increase the diameter or slope, or choose a smoother material.`;
+      }
+    }
+  }
+
+  // ---- calculation and results
+
+  function run(animate = true) {
+    const goal = radio<Goal>('goal');
+    const known = radio<Known>('known');
+    const measure = radio<Measure>('measure');
+    const values = Object.fromEntries(FIELD_IDS.map((id) => [id, readSI(id)]));
+    const outcome = solve({ goal, known, measure, branch: radio<Branch>('branch'), values });
+
+    FIELD_IDS.forEach((id) => fields[id].wrap.classList.remove('bad'));
+
+    if (!outcome.ok) {
+      fields[outcome.field].wrap.classList.add('bad');
+      alertBox.textContent = failureText(outcome);
+      alertBox.hidden = false;
+      picker.hidden = true;
+      current = alternate = null;
+      renderValues(goal, known);
+      setTheta(null, false);
+      return;
+    }
+
+    alertBox.hidden = true;
+    const { solutions } = outcome;
+    if (pick >= solutions.length) pick = 0;
+    current = last = solutions[pick];
+    alternate = solutions.length === 2 ? solutions[1 - pick] : null;
+
+    picker.hidden = solutions.length < 2;
+    if (solutions.length === 2) {
+      const word = known === 'Q' ? 'discharge' : 'velocity';
+      $('[data-picker-text]').textContent = `Two water depths give this ${word}. Choose one:`;
+      $$<HTMLButtonElement>('[data-pick]').forEach((b, i) => {
+        b.textContent = `y/d = ${format(solutions[i].ratio, 3)}`;
+        b.setAttribute('aria-pressed', String(i === pick));
+      });
+    }
+    renderValues(goal, known);
+    setTheta(current.theta, animate);
+  }
+
+  function renderValues(goal: Goal, known: Known) {
+    const s = current;
+    const head = HEADLINE[goal];
+    const headRow = rowUnit(head);
+
+    $('[data-headline-label]').textContent = ROW_LABEL(head);
+    $('[data-headline-value]').textContent = s ? format(shown(head, s)) : '—';
+    headlineUnit.hidden = !headRow;
+    if (headRow && headlineUnit.dataset.for !== head) {
+      headlineUnit.replaceChildren(...[...headRow.options].map((o) => new Option(o.value)));
+      headlineUnit.dataset.for = head;
+    }
+    if (headRow) headlineUnit.value = headRow.value;
+
+    const required = requiredFields(goal, known, radio<Measure>('measure'));
+    const stats = (['Q', 'V', 'ratio', 'F', 'y'] as RowKey[])
+      .filter((k) => k !== head && !required.includes(k as FieldId))
+      .slice(0, 3);
+    stats.forEach((k, i) => {
+      const box = $(`[data-stat="${i}"]`);
+      box.querySelector('dt')!.textContent = ROW_LABEL(k);
+      box.querySelector('output')!.textContent = s ? format(shown(k, s), 4) : '—';
+      box.querySelector('small')!.textContent = k === 'F' ? (s ? regime(s.F) : '') : unitOf(k);
+    });
+
+    for (const k of rowKeys) {
+      const row = $(`[data-row="${k}"]`);
+      row.querySelector('output')!.textContent = s ? format(shown(k, s)) : '—';
+      row.classList.toggle('solved', k === head);
+    }
+    $('[data-fixed="F"]').textContent = s ? regime(s.F) : '';
+    labelFigure();
+  }
+
+  const regime = (F: number) => (F < 0.95 ? 'subcritical' : F > 1.05 ? 'supercritical' : 'critical');
+
+  // ---- cross-section
+
+  const CX = 156;
+  const CY = 148;
+  const RADIUS = 128;
+  const water = $<SVGPathElement>('[data-water]');
+  const level = $<SVGLineElement>('[data-level]');
+  const yDim = $<SVGLineElement>('[data-y-dim]');
+  const labelD = $<SVGTextElement>('[data-label-d]');
+  const labelT = $<SVGTextElement>('[data-label-t]');
+  const labelY = $<SVGTextElement>('[data-label-y]');
+
+  function labelFigure() {
+    const s = current;
+    labelD.textContent = s ? `d = ${format(shown('d', s), 4)} ${unitOf('d')}` : '';
+    labelT.textContent = s ? `T = ${format(shown('T', s), 4)} ${unitOf('T')}` : '';
+    labelY.textContent = s ? `y = ${format(shown('y', s), 4)} ${unitOf('y')}` : '';
+  }
+
+  const surfaceY = (ratio: number) => CY + RADIUS - 2 * RADIUS * ratio;
+
+  function drawSection(theta: number | null) {
+    drawnTheta = theta;
+    const visible = theta !== null;
+    [level, yDim].forEach((el) => el.setAttribute('visibility', visible ? 'visible' : 'hidden'));
+    if (theta === null) {
+      water.setAttribute('d', '');
+      updateMarks();
+      return;
+    }
+    const half = theta / 2;
+    const dx = RADIUS * Math.sin(half);
+    const y = CY + RADIUS * Math.cos(half);
+    water.setAttribute('d', `M${CX - dx} ${y}A${RADIUS} ${RADIUS} 0 ${theta > Math.PI ? 1 : 0} 0 ${CX + dx} ${y}Z`);
+    level.setAttribute('x1', String(CX + dx));
+    level.setAttribute('y1', String(y));
+    level.setAttribute('y2', String(y));
+    yDim.setAttribute('y1', String(y));
+
+    const depth = CY + RADIUS - y;
+    // Near full there is no room above the surface, so the width label moves into the water.
+    const below = y - 9 < CY - RADIUS + 34;
+    labelT.setAttribute('x', String(below ? CX + 8 : CX));
+    labelT.setAttribute('y', String(below ? Math.max(y + 18, 76) : y - 9));
+    labelT.setAttribute('text-anchor', below ? 'start' : 'middle');
+    labelY.setAttribute('x', String(CX + 8));
+    labelY.setAttribute('y', String(depth < 40 ? CY + RADIUS + 20 : y + depth / 2 + 4));
+    updateMarks();
+  }
+
+  function setTheta(theta: number | null, animate: boolean) {
+    cancelAnimationFrame(tween);
+    if (theta === null || drawnTheta === null || !animate || reduced.matches) {
+      drawSection(theta);
+      return;
+    }
+    const from = drawnTheta;
+    const start = performance.now();
+    const step = (now: number) => {
+      const p = Math.min((now - start) / 260, 1);
+      drawSection(from + (theta - from) * (1 - (1 - p) ** 3));
+      if (p < 1) tween = requestAnimationFrame(step);
+    };
+    tween = requestAnimationFrame(step);
+  }
+
+  // ---- hydraulic elements chart (shares its vertical scale with the cross-section)
+
+  const plot = $<SVGSVGElement>('[data-plot]');
+  const plotWrap = $('[data-plot-wrap]');
+  const tip = $('[data-tip]');
+  const LEFT = 44;
+  const RIGHT = 14;
+  const TOP = 20;
+  const BOTTOM = 276;
+  const X_MAX = 1.2;
+  let width = 400;
+  let cursorRatio = 0.5;
+
+  const px = (v: number) => LEFT + (v / X_MAX) * (width - LEFT - RIGHT);
+  const py = (r: number) => BOTTOM - r * (BOTTOM - TOP);
+
+  const CURVE: { r: number; q: number; v: number }[] = [{ r: 0, q: 0, v: 0 }];
+  for (let r = 0.002; r < 1; r += 0.002) CURVE.push({ r, ...relativeFlow(r) });
+  CURVE.push({ r: 1, q: 1, v: 1 });
+
+  const curvePath = (key: 'q' | 'v') =>
+    CURVE.map((p, i) => `${i ? 'L' : 'M'}${px(p[key]).toFixed(1)} ${py(p.r).toFixed(1)}`).join('');
+
+  function drawPlot() {
+    const axis = 'font-family="JetBrains Mono, monospace" font-size="11" fill="#536476"';
+    const xs = [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2];
+    const ys = [0, 0.2, 0.4, 0.6, 0.8, 1];
+    plot.setAttribute('viewBox', `0 0 ${width} 320`);
+    plot.innerHTML = `
+      ${ys.map((r) => `<line x1="${LEFT}" x2="${width - RIGHT}" y1="${py(r)}" y2="${py(r)}" stroke="#e9eef3"/>`).join('')}
+      ${xs.map((v) => `<line x1="${px(v)}" x2="${px(v)}" y1="${TOP}" y2="${BOTTOM}" stroke="${v === 1 ? '#c5d0db' : '#e9eef3'}"/><text x="${px(v)}" y="${BOTTOM + 18}" text-anchor="middle" ${axis}>${v.toFixed(1)}</text>`).join('')}
+      <text x="${LEFT - 8}" y="12" text-anchor="end" ${axis}>y/d</text>
+      <text x="${(LEFT + width - RIGHT) / 2}" y="${BOTTOM + 38}" text-anchor="middle" ${axis}>Ratio to full-pipe value</text>
+      <path d="${curvePath('q')}" fill="none" stroke="#1f8ef1" stroke-width="2" stroke-linejoin="round"/>
+      <path d="${curvePath('v')}" fill="none" stroke="#c2410c" stroke-width="2" stroke-linejoin="round"/>
+      <line data-alt-line x1="${LEFT}" x2="${width - RIGHT}" stroke="#7b8b9c" stroke-dasharray="2 4"/>
+      <line data-cur-line x1="0" x2="${width - RIGHT}" stroke="#0b1b2b" stroke-dasharray="3 4"/>
+      ${ys.map((r) => `<text x="${LEFT - 8}" y="${py(r) + 4}" text-anchor="end" paint-order="stroke" stroke="#fff" stroke-width="5" stroke-linejoin="round" ${axis}>${r.toFixed(1)}</text>`).join('')}
+      <circle data-dot-q r="5" fill="#1f8ef1" stroke="#fff" stroke-width="2"/>
+      <circle data-dot-v r="5" fill="#c2410c" stroke="#fff" stroke-width="2"/>
+      <line data-hair x1="${LEFT}" x2="${width - RIGHT}" stroke="#536476" visibility="hidden"/>
+    `;
+    updateMarks();
+  }
+
+  function setY(el: Element | null, r: number) {
+    el?.setAttribute('y1', String(py(r)));
+    el?.setAttribute('y2', String(py(r)));
+  }
+
+  function updateMarks() {
+    const line = plot.querySelector('[data-cur-line]');
+    if (!line) return;
+    const altLine = plot.querySelector('[data-alt-line]')!;
+    const dotQ = plot.querySelector('[data-dot-q]')!;
+    const dotV = plot.querySelector('[data-dot-v]')!;
+    const show = drawnTheta !== null;
+    [line, dotQ, dotV].forEach((el) => el.setAttribute('visibility', show ? 'visible' : 'hidden'));
+    altLine.setAttribute('visibility', alternate ? 'visible' : 'hidden');
+    if (alternate) setY(altLine, alternate.ratio);
+    if (drawnTheta === null) return;
+    const r = ratioFromTheta(drawnTheta);
+    const f = relativeFlow(r);
+    setY(line, r);
+    dotQ.setAttribute('cx', String(px(f.q)));
+    dotQ.setAttribute('cy', String(py(r)));
+    dotV.setAttribute('cx', String(px(f.v)));
+    dotV.setAttribute('cy', String(py(r)));
+  }
+
+  function showCursor(r: number) {
+    cursorRatio = Math.min(0.99, Math.max(0.01, r));
+    const f = relativeFlow(cursorRatio);
+    const hair = plot.querySelector('[data-hair]')!;
+    hair.setAttribute('visibility', 'visible');
+    setY(hair, cursorRatio);
+    $('[data-tip-r]').textContent = cursorRatio.toFixed(2);
+    $('[data-tip-q]').textContent = f.q.toFixed(3);
+    $('[data-tip-v]').textContent = f.v.toFixed(3);
+    tip.hidden = false;
+    const w = tip.offsetWidth;
+    const h = tip.offsetHeight;
+    const anchor = Math.max(px(f.q), px(f.v)) + 12;
+    const left = anchor + w > width ? Math.min(px(f.q), px(f.v)) - w - 12 : anchor;
+    tip.style.left = `${Math.max(LEFT, left)}px`;
+    tip.style.top = `${Math.max(0, Math.min(py(cursorRatio) - h / 2, 320 - h))}px`;
+  }
+
+  function hideCursor() {
+    tip.hidden = true;
+    plot.querySelector('[data-hair]')?.setAttribute('visibility', 'hidden');
+  }
+
+  const ratioAt = (e: PointerEvent) => {
+    const rect = plot.getBoundingClientRect();
+    return (BOTTOM - (e.clientY - rect.top)) / (BOTTOM - TOP);
+  };
+
+  function setDepthFromChart(r: number) {
+    if (!canSetDepth() || !Number.isFinite(readSI('d'))) return;
+    const clamped = Math.min(0.99, Math.max(0.01, r));
+    const { input, unit } = fields.y;
+    const factor = UNITS.length[unit!.value];
+    input.value = String(Number(((clamped * readSI('d')) / factor).toPrecision(4)));
+    run(false);
+  }
+
+  plot.addEventListener('pointermove', (e) => {
+    showCursor(ratioAt(e));
+    if (e.buttons === 1) setDepthFromChart(ratioAt(e));
+  });
+  plot.addEventListener('pointerdown', (e) => setDepthFromChart(ratioAt(e)));
+  plot.addEventListener('pointerleave', hideCursor);
+  plot.addEventListener('focus', () => showCursor(current?.ratio ?? 0.5));
+  plot.addEventListener('blur', hideCursor);
+  plot.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      showCursor(cursorRatio + (e.key === 'ArrowUp' ? 0.01 : -0.01));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      setDepthFromChart(cursorRatio);
+    }
+  });
+
+  new ResizeObserver(() => {
+    const w = plotWrap.clientWidth;
+    if (w > 0 && w !== width) {
+      width = w;
+      drawPlot();
+    }
+  }).observe(plotWrap);
+
+  // ---- events
+
+  function resetUnitMemory() {
+    $$<HTMLSelectElement>('select[data-unit]').forEach((s) => (s.dataset.prev = s.value));
+  }
+
+  function applySystem(system: 'si' | 'us') {
+    const preset = PRESETS[system];
+    for (const id of FIELD_IDS) {
+      const { input, unit } = fields[id];
+      if (!unit) continue;
+      const kind = unit.dataset.unit as Kind;
+      const si = readSI(id);
+      unit.value = preset[kind];
+      unit.dataset.prev = unit.value;
+      if (Number.isFinite(si)) input.value = tidy(si / UNITS[kind][unit.value]);
+    }
+    $$<HTMLSelectElement>('select[data-row-unit]').forEach((s) => {
+      s.value = preset[s.dataset.rowUnit as Kind];
+    });
+    const slope = system === 'us' ? 'ft/ft' : 'm/m';
+    $('[data-slope-unit]').textContent = slope;
+    $('[data-fixed="S"]').textContent = slope;
+    run(false);
+  }
+
+  root.addEventListener('submit', (e) => e.preventDefault());
+
+  root.addEventListener('input', (e) => {
+    const t = e.target as HTMLElement;
+    if (t === fields.n.input) syncMaterial();
+    if (t instanceof HTMLInputElement && t.type === 'number') run();
+  });
+
+  root.addEventListener('change', (e) => {
+    const t = e.target as HTMLElement;
+    if (t instanceof HTMLInputElement && t.type === 'radio') {
+      if (t.name === 'system') {
+        applySystem(t.value as 'si' | 'us');
+        return;
+      }
+      pick = 0;
+      syncVisibility(true);
+      run();
+      return;
+    }
+    if (t === material) {
+      const m = MATERIALS[Number(material.value)];
+      if (m) fields.n.input.value = String(m.n);
+      syncMaterial();
+      run();
+      return;
+    }
+    if (t === headlineUnit) {
+      rowUnit(headlineUnit.dataset.for as RowKey)!.value = headlineUnit.value;
+      run(false);
+      return;
+    }
+    if (t instanceof HTMLSelectElement && t.dataset.unit) {
+      const kind = t.dataset.unit as Kind;
+      const id = FIELD_IDS.find((f) => fields[f].unit === t)!;
+      const { input } = fields[id];
+      const v = input.valueAsNumber;
+      if (Number.isFinite(v)) input.value = tidy((v * UNITS[kind][t.dataset.prev!]) / UNITS[kind][t.value]);
+      t.dataset.prev = t.value;
+      run(false);
+      return;
+    }
+    if (t instanceof HTMLSelectElement && t.dataset.rowUnit) run(false);
+  });
+
+  $$<HTMLButtonElement>('[data-pick]').forEach((b) =>
+    b.addEventListener('click', () => {
+      pick = Number(b.dataset.pick);
+      run();
+    }),
+  );
+
+  $('[data-reset]').addEventListener('click', () => {
+    root.reset();
+    pick = 0;
+    last = null;
+    resetUnitMemory();
+    $('[data-slope-unit]').textContent = 'm/m';
+    $('[data-fixed="S"]').textContent = 'm/m';
+    syncVisibility(false);
+    run();
+    $('[data-copy-status]').textContent = '';
+  });
+
+  $('[data-copy]').addEventListener('click', async () => {
+    const status = $('[data-copy-status]');
+    if (!current) {
+      status.textContent = 'Nothing to copy yet';
+      return;
+    }
+    const s = current;
+    const lines = ['Circular culvert, uniform flow (Manning equation)', ...rowKeys.map((k) => `${ROW_LABEL(k)}: ${format(shown(k, s), 8)} ${unitOf(k)}`.trim())];
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      status.textContent = 'Copied';
+    } catch {
+      status.textContent = 'Copy failed. Your browser blocked clipboard access.';
+    }
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-use-n]').forEach((b) =>
+    b.addEventListener('click', () => {
+      if (radio<Goal>('goal') === 'roughness') {
+        $<HTMLInputElement>('input[name="goal"][value="flow"]').checked = true;
+        syncVisibility(true);
+      }
+      material.value = b.dataset.useN!;
+      fields.n.input.value = String(MATERIALS[Number(b.dataset.useN)].n);
+      syncMaterial();
+      run();
+      root.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
+    }),
+  );
+
+  // ---- start
+
+  $('[data-peak-q]').textContent = format(peaks.discharge.ratio, 3);
+  $('[data-peak-v]').textContent = format(peaks.velocity.ratio, 3);
+  resetUnitMemory();
+  width = plotWrap.clientWidth || width;
+  drawPlot();
+  syncVisibility(false);
+  run(false);
+</script>

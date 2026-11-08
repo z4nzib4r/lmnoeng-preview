@@ -1,5 +1,5 @@
 ---
-import { categories } from '../data/calculators';
+import { calcLinks, categories } from '../data/calculators';
 const total = categories.reduce((n, c) => n + c.calcs.length, 0);
 ---
 
@@ -8,8 +8,8 @@ const total = categories.reduce((n, c) => n + c.calcs.length, 0);
     <div class="top">
       <div class="section-head reveal">
         <span class="eyebrow">Calculator library</span>
-        <h2>Every flow problem, organized.</h2>
-        <p>Pick a discipline or search by name. Each calculator shows its equations, assumptions, and references so you can check the result.</p>
+        <h2>Focused on fluids and water.</h2>
+        <p>Not thousands of topics, just the ones engineers in this field work on. Start with free tools for quick checks, and subscribe when the problem gets harder.</p>
       </div>
       <div class="search reveal">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
@@ -34,7 +34,7 @@ const total = categories.reduce((n, c) => n + c.calcs.length, 0);
             <ul>
               {c.calcs.map((name) => (
                 <li data-name={name.toLowerCase()}>
-                  <a href="#">{name}</a>
+                  <a href={calcLinks[name] ?? '#'}>{name}</a>
                 </li>
               ))}
             </ul>

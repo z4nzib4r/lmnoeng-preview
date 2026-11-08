@@ -6,7 +6,7 @@ A modern, front-end-only redesign of the [lmnoeng.com](https://lmnoeng.com) home
 
 ```bash
 npm install
-npm run dev      # http://localhost:4321
+npm run dev      # http://localhost:4321 (requires Node 22.23.4 or later)
 npm run build    # static output in dist/
 npm run preview
 ```
@@ -19,10 +19,14 @@ npm run preview
 | Hero | Value proposition plus a **working Manning's equation calculator** (rectangular channel, SI/US toggle, animated cross-section, Froude number and flow regime) |
 | Calculator library | Eight discipline cards with live client-side search |
 | Popular calculators | Most-used tools with their governing equations |
+| Pricing | The four subscription plans from `lmnoeng.com/register.php`, refund terms, and how a PIN is delivered |
+| Specialty programs | Nine PIN-required tools that link to their live pages |
 | Consulting | Services grid and a three-step engagement process |
 | Why LMNO | Brand pillars plus a sample "calculation report" card |
 | Contact | Project inquiry form (demo only, not connected to a backend) |
 | Footer | Sitemap and disclaimer |
+
+A full example calculator lives at `/calculators/circular-culvert`. The math is in `src/lib/culvert.ts`.
 
 ## Structure
 
@@ -39,6 +43,5 @@ No UI framework or CSS library is used. Styles are scoped Astro CSS, and the int
 
 ## Before showing the client
 
-- Contact details in `Contact.astro` are placeholders (`[email address]`, `[phone number]`, `[office address]`).
 - Calculator links are `#` placeholders. Map them to the live calculator URLs.
 - Check the calculator names and categories in `src/data/calculators.ts` against the current site.

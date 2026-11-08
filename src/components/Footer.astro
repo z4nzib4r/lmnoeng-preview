@@ -15,21 +15,22 @@ const year = new Date().getFullYear();
       <nav aria-label="Calculators">
         <h4>Calculators</h4>
         <ul>
-          {categories.slice(0, 5).map((c) => <li><a href={`#${c.id}`}>{c.title}</a></li>)}
+          {categories.slice(0, 5).map((c) => <li><a href={`/#${c.id}`}>{c.title}</a></li>)}
         </ul>
       </nav>
       <nav aria-label="More calculators">
         <h4>More</h4>
         <ul>
-          {categories.slice(5).map((c) => <li><a href={`#${c.id}`}>{c.title}</a></li>)}
+          {categories.slice(5).map((c) => <li><a href={`/#${c.id}`}>{c.title}</a></li>)}
         </ul>
       </nav>
       <nav aria-label="Company">
         <h4>Company</h4>
         <ul>
-          <li><a href="#consulting">Consulting</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="/#pricing">Pricing</a></li>
+          <li><a href="/#consulting">Consulting</a></li>
+          <li><a href="/#about">About</a></li>
+          <li><a href="/#contact">Contact</a></li>
           <li><a href="#">Terms of use</a></li>
         </ul>
       </nav>

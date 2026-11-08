@@ -1,0 +1,90 @@
+---
+const tools = [
+  { title: 'Culvert design', desc: 'Inlet and outlet control', href: 'https://www.lmnoeng.com/Pipes/hds.php' },
+  { title: 'Gradually varied flow', desc: 'Water surface profiles in open channels', href: 'https://www.lmnoeng.com/Channels/gvf.php' },
+  { title: 'TR-55 stormwater runoff', desc: 'Runoff from small watersheds', href: 'https://www.lmnoeng.com/Hydrology/hydrology.php' },
+  { title: 'TR-55 detention storage', desc: 'Detention basin volume', href: 'https://www.lmnoeng.com/Hydrology/storage.php' },
+  { title: 'Theis well function', desc: 'Aquifer response to pumping', href: 'https://www.lmnoeng.com/Groundwater/theis.php' },
+  { title: 'Contaminant transport', desc: '3-D slug injection in groundwater', href: 'https://www.lmnoeng.com/Groundwater/transportPulse.php' },
+  { title: 'Water hammer', desc: 'Timed valve closure or opening', href: 'https://www.lmnoeng.com/WaterHammer/WaterHammer.php' },
+  { title: 'Pipe network', desc: 'Solve networks of up to 12 pipes', href: 'https://www.lmnoeng.com/Pipes/PipeNetwork.php' },
+  { title: 'Pressure relief valves', desc: 'Liquid relief valve sizing', href: 'https://www.lmnoeng.com/Relief/PressureReliefValve.php' },
+];
+---
+
+<section id="specialty" class="section specialty">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Specialty programs</span>
+      <h2>For problems one formula can't solve.</h2>
+      <p>Quick answers are easy to find. These are the design tools general calculator sites rarely offer, built for engineers working in hydraulics, stormwater, and groundwater.</p>
+    </div>
+    <div class="tools">
+      {
+        tools.map((t) => (
+          <a href={t.href} class="tool reveal">
+            <strong>{t.title}</strong>
+            <span>{t.desc}</span>
+          </a>
+        ))
+      }
+    </div>
+    <a href="#pricing" class="btn btn-primary reveal">See subscription plans</a>
+  </div>
+</section>
+
+<style>
+  .specialty {
+    background: var(--ink);
+    color: #fff;
+  }
+  .section-head p {
+    color: var(--muted-light);
+  }
+  .eyebrow {
+    color: var(--water-2);
+  }
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .tool {
+    display: block;
+    padding: 20px 22px;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.04);
+    text-decoration: none;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+  }
+  .tool:hover {
+    border-color: var(--water-2);
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .tool strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+  }
+  .tool span {
+    display: block;
+    margin-top: 2px;
+    font-size: 14.5px;
+    color: var(--muted-light);
+  }
+  @media (max-width: 860px) {
+    .tools {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .tools {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

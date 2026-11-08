@@ -2,6 +2,11 @@
 // Category and calculator names reflect LMNO Engineering's published calculator topics;
 // links are placeholders (#) until mapped to the live URLs on lmnoeng.com.
 
+/** Calculators that have a page in this preview. */
+export const calcLinks: Record<string, string> = {
+  'Circular culvert': '/calculators/circular-culvert',
+};
+
 export interface Category {
   id: string;
   title: string;

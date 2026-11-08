@@ -1,0 +1,167 @@
+---
+import ChannelCalculator from './ChannelCalculator.astro';
+---
+
+<section class="hero">
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="container inner">
+    <div class="copy">
+      <span class="eyebrow">Fluid mechanics · Hydrology · Environmental</span>
+      <h1>Engineering calculations you can <span class="hl">trust</span>, right in your browser.</h1>
+      <p class="lede">
+        LMNO Engineering builds online calculators and software for flow in channels, pipes, weirs, flumes,
+        and the environment. They're free to use and come with documented equations and references. When a
+        project needs more, our engineers can help.
+      </p>
+      <div class="ctas">
+        <a href="#calculators" class="btn btn-primary">
+          Browse calculators
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        <a href="#consulting" class="btn btn-ghost">Consulting services</a>
+      </div>
+      <ul class="proof">
+        <li>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+          US &amp; SI units
+        </li>
+        <li>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+          Equations &amp; references shown
+        </li>
+        <li>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+          Built by engineers
+        </li>
+      </ul>
+    </div>
+    <div class="demo">
+      <ChannelCalculator />
+    </div>
+  </div>
+  <svg class="waves" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <path class="w1" d="M0 70 C 240 30 480 110 720 70 S 1200 30 1440 70 V120 H0Z"></path>
+    <path class="w2" d="M0 90 C 240 60 480 120 720 90 S 1200 60 1440 90 V120 H0Z"></path>
+  </svg>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(1200px 600px at 80% -10%, #1d4a77 0%, transparent 60%), var(--ink);
+    color: #fff;
+    padding: 148px 0 140px;
+  }
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at 30% 30%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at 30% 30%, #000 30%, transparent 75%);
+  }
+  .glow {
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    right: -120px;
+    top: 160px;
+    background: radial-gradient(circle, rgba(31, 142, 241, 0.35), transparent 65%);
+    filter: blur(20px);
+  }
+  .inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .eyebrow {
+    color: var(--water-2);
+  }
+  h1 {
+    font-size: clamp(40px, 5.4vw, 68px);
+    margin-top: 20px;
+    letter-spacing: -0.03em;
+  }
+  .hl {
+    background: linear-gradient(90deg, var(--water-2), var(--water));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .lede {
+    margin-top: 24px;
+    font-size: 19px;
+    color: var(--muted-light);
+    max-width: 560px;
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 36px;
+  }
+  .proof {
+    list-style: none;
+    padding: 0;
+    margin: 40px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .proof li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .proof svg {
+    color: var(--water-2);
+  }
+  .demo {
+    position: relative;
+    max-width: 460px;
+    justify-self: end;
+    width: 100%;
+  }
+  .waves {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 90px;
+  }
+  .w1 {
+    fill: rgba(31, 142, 241, 0.18);
+  }
+  .w2 {
+    fill: var(--paper);
+  }
+  @media (max-width: 980px) {
+    .inner {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+    .demo {
+      justify-self: start;
+    }
+  }
+  @media (max-width: 640px) {
+    .hero {
+      padding: 120px 0 110px;
+    }
+    .lede {
+      font-size: 17px;
+    }
+    .ctas .btn {
+      flex: 1 1 auto;
+    }
+  }
+</style>

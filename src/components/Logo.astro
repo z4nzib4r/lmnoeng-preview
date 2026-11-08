@@ -1,0 +1,49 @@
+---
+interface Props {
+  light?: boolean;
+}
+const { light = false } = Astro.props;
+---
+
+<a href="/" class:list={['logo', { light }]} aria-label="LMNO Engineering home">
+  <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true">
+    <rect width="32" height="32" rx="8" fill={light ? '#ffffff' : '#0b1b2b'}></rect>
+    <path d="M5 19c3.5 0 3.5-3 7-3s3.5 3 7 3 3.5-3 7-3" fill="none" stroke="#5cc3ff" stroke-width="2.6" stroke-linecap="round"></path>
+    <path d="M5 24c3.5 0 3.5-3 7-3s3.5 3 7 3 3.5-3 7-3" fill="none" stroke="#1f8ef1" stroke-width="2.6" stroke-linecap="round"></path>
+    <path d="M9 8v6M16 6v8M23 9v5" stroke={light ? '#0b1b2b' : '#ffffff'} stroke-width="2.6" stroke-linecap="round"></path>
+  </svg>
+  <span class="wordmark">
+    <strong>LMNO</strong>
+    <span>Engineering</span>
+  </span>
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .logo.light {
+    color: #fff;
+  }
+  .wordmark {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    font-family: var(--font-display);
+  }
+  .wordmark strong {
+    font-size: 18px;
+    letter-spacing: 0.04em;
+  }
+  .wordmark span {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-top: 3px;
+  }
+</style>

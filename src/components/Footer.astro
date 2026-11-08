@@ -1,0 +1,104 @@
+---
+import Logo from './Logo.astro';
+import { categories } from '../data/calculators';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="top">
+      <div class="brand">
+        <Logo light />
+        <p>Engineering, Research, and Software, Ltd. Online calculators, consulting, and software for fluid mechanics, hydrology, and environmental engineering.</p>
+      </div>
+      <nav aria-label="Calculators">
+        <h4>Calculators</h4>
+        <ul>
+          {categories.slice(0, 5).map((c) => <li><a href={`#${c.id}`}>{c.title}</a></li>)}
+        </ul>
+      </nav>
+      <nav aria-label="More calculators">
+        <h4>More</h4>
+        <ul>
+          {categories.slice(5).map((c) => <li><a href={`#${c.id}`}>{c.title}</a></li>)}
+        </ul>
+      </nav>
+      <nav aria-label="Company">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#consulting">Consulting</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><a href="#">Terms of use</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="bottom">
+      <p>© {year} LMNO Engineering, Research, and Software, Ltd. All rights reserved.</p>
+      <p class="disclaimer">Calculations are provided for informational purposes. Verify results before use in design.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--ink);
+    color: var(--muted-light);
+    padding: 72px 0 32px;
+  }
+  .top {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 40px;
+  }
+  .brand p {
+    margin-top: 18px;
+    font-size: 14.5px;
+    max-width: 340px;
+  }
+  h4 {
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    letter-spacing: 0;
+    margin-bottom: 14px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+  }
+  a {
+    text-decoration: none;
+    font-size: 14.5px;
+  }
+  a:hover {
+    color: #fff;
+  }
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line-dark);
+    font-size: 13px;
+  }
+  @media (max-width: 860px) {
+    .top {
+      grid-template-columns: 1fr 1fr;
+    }
+    .brand {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 460px) {
+    .top {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

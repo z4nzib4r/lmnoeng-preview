@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 const services = [
   {
     title: 'Hydraulic design & analysis',
@@ -43,7 +44,7 @@ const steps = [
           A calculator site can't review your design. The engineers behind these tools can, with
           hydraulic and environmental analysis, expert review, and custom software.
         </p>
-        <a href="/consulting" class="btn btn-primary">See projects and credentials</a>
+        <a href={url('/consulting')} class="btn btn-primary">See projects and credentials</a>
       </div>
       <ol class="steps reveal">
         {

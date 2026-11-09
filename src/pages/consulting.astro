@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -87,7 +88,7 @@ const publications = [
       <div class="container band-inner">
         <div class="copy">
           <nav class="crumbs" aria-label="Breadcrumb">
-            <a href="/">Home</a><span aria-hidden="true">/</span>
+            <a href={url('/')}>Home</a><span aria-hidden="true">/</span>
             <span aria-current="page">Consulting</span>
           </nav>
           <h1>Fluid flow problems, solved by the people behind the calculators.</h1>
@@ -201,7 +202,7 @@ const publications = [
         <div class="people-grid">
           <article class="person reveal">
             <header>
-              <img src="/ken-edwards.jpg" alt="Ken Edwards" width="96" height="128" loading="lazy" />
+              <img src={url('/ken-edwards.jpg')} alt="Ken Edwards" width="96" height="128" loading="lazy" />
               <div>
                 <h3>Ken Edwards, Ph.D., P.E.</h3>
                 <p class="role">Co-owner and fluid flow specialist. Consulting and software development.</p>

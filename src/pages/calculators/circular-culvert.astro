@@ -1,4 +1,5 @@
 ---
+import { url } from '../../lib/url';
 import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -47,8 +48,8 @@ const related = [
       <div class="grid-bg" aria-hidden="true"></div>
       <div class="container band-inner">
         <nav class="crumbs" aria-label="Breadcrumb">
-          <a href="/">Home</a><span aria-hidden="true">/</span>
-          <a href="/#calculators">Calculators</a><span aria-hidden="true">/</span>
+          <a href={url('/')}>Home</a><span aria-hidden="true">/</span>
+          <a href={url('/#calculators')}>Calculators</a><span aria-hidden="true">/</span>
           <span aria-current="page">Circular culvert</span>
         </nav>
         <h1>Circular culvert calculator</h1>
@@ -172,8 +173,8 @@ const related = [
           <p>Plans start at $40 for 7 days. Need a design reviewed instead? LMNO takes on consulting projects too.</p>
         </div>
         <div class="cta-links">
-          <a class="btn btn-primary" href="/#pricing">See pricing</a>
-          <a class="btn btn-ghost" href="/consulting">Consulting</a>
+          <a class="btn btn-primary" href={url('/#pricing')}>See pricing</a>
+          <a class="btn btn-ghost" href={url('/consulting')}>Consulting</a>
         </div>
       </section>
     </div>

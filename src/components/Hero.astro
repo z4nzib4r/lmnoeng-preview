@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 import ChannelCalculator from './ChannelCalculator.astro';
 ---
 
@@ -19,7 +20,7 @@ import ChannelCalculator from './ChannelCalculator.astro';
           Browse calculators
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
         </a>
-        <a href="/consulting" class="btn btn-ghost">Consulting services</a>
+        <a href={url('/consulting')} class="btn btn-ghost">Consulting services</a>
       </div>
       <ul class="proof">
         <li>

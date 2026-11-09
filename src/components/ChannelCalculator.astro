@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 const materials = [
   { label: 'Concrete', n: 0.013 },
   { label: 'PVC', n: 0.01 },
@@ -72,7 +73,7 @@ const materials = [
     </dl>
   </div>
   <p class="formula">Q = (k/n) · A · R<sup>2/3</sup> · S<sup>1/2</sup></p>
-  <a class="full" href="/calculators/circular-culvert">Open the full circular culvert calculator →</a>
+  <a class="full" href={url('/calculators/circular-culvert')}>Open the full circular culvert calculator →</a>
 </div>
 
 <style>

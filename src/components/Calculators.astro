@@ -1,4 +1,5 @@
 ---
+import { url } from '../lib/url';
 import { calcLinks, categories } from '../data/calculators';
 const total = categories.reduce((n, c) => n + c.calcs.length, 0);
 ---
@@ -34,7 +35,7 @@ const total = categories.reduce((n, c) => n + c.calcs.length, 0);
             <ul>
               {c.calcs.map((name) => (
                 <li data-name={name.toLowerCase()}>
-                  <a href={calcLinks[name] ?? '#'}>{name}</a>
+                  <a href={calcLinks[name] ? url(calcLinks[name]) : '#'}>{name}</a>
                 </li>
               ))}
             </ul>

@@ -28,6 +28,8 @@ npm run preview
 
 A full example calculator lives at `/calculators/circular-culvert`. The math is in `src/lib/culvert.ts`.
 
+The consulting page is at `/consulting`. Its searchable project record comes from `src/data/projects.ts`, which was generated from the list at `lmnoeng.com/civil.htm`.
+
 ## Structure
 
 ```

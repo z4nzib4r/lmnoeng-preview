@@ -1,0 +1,717 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Contact from '../components/Contact.astro';
+import { projects } from '../data/projects';
+
+const count = (pick: (p: (typeof projects)[number]) => boolean) => projects.filter(pick).length;
+const years = [...new Set(projects.map((p) => p.year))].sort((a, b) => b - a);
+
+const stats = [
+  { value: String(projects.length), label: 'projects on the record' },
+  { value: '1998', label: 'year the firm was formed' },
+  { value: String(count((p) => p.deliverables.includes('Report'))), label: 'delivered with a written report' },
+  { value: String(count((p) => p.tags.includes('expert'))), label: 'expert witness engagements' },
+];
+
+const methods = [
+  {
+    n: '01',
+    title: 'Existing computer models',
+    text: 'When an established model fits the problem, we set it up, run it, and report what it means.',
+    chips: ['EPANET', 'HEC-RAS', 'HEC-HMS', 'TR-55'],
+    example: 'Pump head and vacuum breaker locations for a long pipeline over hilly terrain, modeled in EPANET.',
+    year: 2023,
+  },
+  {
+    n: '02',
+    title: 'Models we develop',
+    text: 'When nothing off the shelf applies, we derive the equations and build the tool around them.',
+    chips: ['Equation development', 'Spreadsheets', 'Computer programs'],
+    example: 'Transient gas pressure loss in a long narrow tube, solved by the method of characteristics, with a report and computer program.',
+    year: 2018,
+  },
+  {
+    n: '03',
+    title: 'Pencil-and-paper solutions',
+    text: 'Some questions need a rigorous mathematical solution, or a second set of eyes on the one you have.',
+    chips: ['Analytical solutions', 'Calculation checks', 'Expert review'],
+    example: 'Derivation of velocity versus distance upstream of a submerged orifice.',
+    year: 2014,
+  },
+];
+
+const filters = [
+  ['pipes', 'Pipe flow'],
+  ['networks', 'Pipe networks'],
+  ['culverts', 'Culverts & channels'],
+  ['measurement', 'Flow measurement'],
+  ['gas', 'Gas & steam'],
+  ['stormwater', 'Stormwater'],
+  ['rivers', 'Rivers & flooding'],
+  ['forces', 'Forces & structures'],
+  ['tanks', 'Tanks & volumes'],
+  ['heat', 'Heat transfer'],
+  ['pumps', 'Pumps'],
+  ['transients', 'Pressure transients'],
+  ['groundwater', 'Groundwater'],
+  ['expert', 'Expert witness'],
+  ['specialty', 'Other'],
+].map(([id, label]) => ({ id, label, n: count((p) => p.tags.includes(id)) }));
+
+const chipsFor = (p: (typeof projects)[number]) => [
+  ...p.tools,
+  ...p.deliverables.filter((d) => !(d === 'Modeling' && p.tools.length)),
+];
+
+const publications = [
+  "Edwards, K. B., Edwards, D. J., and McKenzie, S. A. Computation of Hydraulic Jump's Sequent Depth in Sloped Circular Water Pipe. 2018 National Hydraulic Engineering Conference. Columbus, Ohio. 2018.",
+  'Edwards, K. B., Stoertz, M. S., and Turney, D. C. Hydrologic modeling of reclaimed strip mine spoil. Proceedings of the 15th Annual Meeting, American Society for Surface Mining and Reclamation. 1998, pp. 73-76.',
+  'Edwards, K. B. and Turney, D. C. The principal origin of lake acidity: Underground mines, minespoil, or buried gob? International Journal of Surface Mining, Reclamation, and Environment. 1997. v. 11(3), pp. 139-144.',
+  "Edwards, K. B. Venting test analysis using Jacob's approximation. Journal of Environmental Engineering, ASCE. 1996. v. 122(3), pp. 232-234.",
+  'Edwards, K. B. and Jones, L. C. Air permeability from pneumatic tests in oxidized till. Journal of Environmental Engineering, ASCE. 1994. v. 120, pp. 329-347.',
+  'Edwards, K. B. and Jones, L. C. Modeling pumping tests in weathered glacial till. Journal of Hydrology. 1993. v. 150, pp. 41-60.',
+  'Edwards, K. B. Estimating aquifer parameters from a horizontal well pumping test in an unconfined aquifer. Water Resources Bulletin. 1991. v. 27, pp. 831-839.',
+];
+---
+
+<Base
+  title="Consulting | LMNO Engineering"
+  description="Fluid flow, hydraulics, and water resources consulting since 1998. Modeling, equation development, reports, and expert witness work from Ken Edwards, Ph.D., P.E., and Debbie Edwards."
+>
+  <Header />
+  <main>
+    <section class="band">
+      <div class="grid-bg" aria-hidden="true"></div>
+      <div class="container band-inner">
+        <div class="copy">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/">Home</a><span aria-hidden="true">/</span>
+            <span aria-current="page">Consulting</span>
+          </nav>
+          <h1>Fluid flow problems, solved by the people behind the calculators.</h1>
+          <p>
+            Since 1998, LMNO has helped clients solve challenging problems with existing computer models,
+            models we develop, or pencil-and-paper mathematics. Your project goes straight to the principals.
+          </p>
+          <div class="ctas">
+            <a class="btn btn-primary" href="#contact">Discuss your project</a>
+            <a class="btn btn-ghost" href="#projects">Browse past projects</a>
+          </div>
+        </div>
+        <dl class="stats">
+          {
+            stats.map((s) => (
+              <div>
+                <dd>{s.value}</dd>
+                <dt>{s.label}</dt>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="section methods">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">How we work</span>
+          <h2>Three ways to get to the answer.</h2>
+          <p>The method follows the problem. Results come back as a written report, a spreadsheet you can reuse, or software.</p>
+        </div>
+        <div class="method-grid">
+          {
+            methods.map((m) => (
+              <article class="method reveal">
+                <span class="num">{m.n}</span>
+                <h3>{m.title}</h3>
+                <p>{m.text}</p>
+                <ul class="chips">
+                  {m.chips.map((c) => <li>{c}</li>)}
+                </ul>
+                <div class="example">
+                  <span>From the record, {m.year}</span>
+                  <p>{m.example}</p>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section record">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Project record</span>
+          <h2>From fire hydrants to blood flow through a heart.</h2>
+          <p>Search {projects.length} projects from 2001 to 2025. Some work is covered by confidentiality agreements and isn't listed in detail, so call or email if you don't see your problem here.</p>
+        </div>
+
+        <div class="controls" data-controls>
+          <label class="search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <span class="sr">Search projects</span>
+            <input type="search" placeholder="Try “water hammer” or “EPANET”" data-search />
+          </label>
+          <div class="pills" role="group" aria-label="Filter projects by topic">
+            <button type="button" data-filter="" aria-pressed="true">All <small>{projects.length}</small></button>
+            {filters.map((f) => <button type="button" data-filter={f.id} aria-pressed="false">{f.label} <small>{f.n}</small></button>)}
+          </div>
+          <p class="count" role="status" data-count></p>
+        </div>
+
+        <div class="ledger" data-ledger>
+          {
+            years.map((year) => (
+              <section class="year" data-year>
+                <h3>{year}</h3>
+                <ul>
+                  {projects
+                    .filter((p) => p.year === year)
+                    .map((p) => (
+                      <li
+                        data-project
+                        data-tags={p.tags.join(' ')}
+                        data-text={`${p.title} ${p.tools.join(' ')} ${p.deliverables.join(' ')}`.toLowerCase()}
+                      >
+                        <span class="title">{p.title}</span>
+                        <span class="tags">{chipsFor(p).map((c) => <i>{c}</i>)}</span>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            ))
+          }
+        </div>
+        <p class="empty" data-empty hidden>No listed projects match that. The problem may still be one we can solve, so <a href="#contact">tell us about it</a>.</p>
+        <button type="button" class="btn btn-dark more" data-more hidden>Show all projects</button>
+      </div>
+    </section>
+
+    <section class="section people">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Principals</span>
+          <h2>You work directly with the principals.</h2>
+          <p>LMNO is co-owned and run by two engineers with backgrounds spanning civil, environmental, and nuclear engineering.</p>
+        </div>
+
+        <div class="people-grid">
+          <article class="person reveal">
+            <header>
+              <img src="/ken-edwards.jpg" alt="Ken Edwards" width="96" height="128" loading="lazy" />
+              <div>
+                <h3>Ken Edwards, Ph.D., P.E.</h3>
+                <p class="role">Co-owner and fluid flow specialist. Consulting and software development.</p>
+              </div>
+            </header>
+            <h4>Education</h4>
+            <ul>
+              <li>Ph.D., Civil (Environmental) Engineering, Iowa State University, 1993</li>
+              <li>M.S.E., Civil Engineering, Southern Methodist University, 1989</li>
+              <li>B.S.N.E., Nuclear Engineering, Purdue University, 1986</li>
+            </ul>
+            <h4>Teaching</h4>
+            <ul>
+              <li>Instructor, Columbia Southern University, 2010–present</li>
+              <li>Senior Instructor, Norwich University, 2013–2025</li>
+              <li>Adjunct Faculty in Mechanical Engineering, Ohio University, 2012, 2013, 2016</li>
+              <li>Assistant Professor of Civil Engineering, Ohio University, 1993–2000</li>
+            </ul>
+            <h4>Profession</h4>
+            <ul>
+              <li>Member, American Society of Civil Engineers</li>
+              <li>Article reviewer for the ASCE Journal of Environmental Engineering, ASCE Journal of Hydraulic Engineering, and Soil Science Society of America Journal</li>
+              <li>Recent training includes Advanced HEC-RAS Modeling, culvert design for fish passage, and CFD applications in stormwater treatment</li>
+            </ul>
+            <details>
+              <summary>Selected publications</summary>
+              <ul>{publications.map((p) => <li>{p}</li>)}</ul>
+            </details>
+          </article>
+
+          <article class="person reveal">
+            <header>
+              <span class="mono" aria-hidden="true">DE</span>
+              <div>
+                <h3>Debbie Edwards</h3>
+                <p class="role">Co-owner, engineer, and numerical methods specialist.</p>
+              </div>
+            </header>
+            <h4>Education</h4>
+            <ul>
+              <li>M.S.N.E., Nuclear Engineering, Purdue University, 1987</li>
+              <li>B.S.N.E., Purdue University, 1985</li>
+            </ul>
+            <h4>Experience</h4>
+            <ul>
+              <li>Senior Instructor, Norwich University, 2022–2024, teaching engineering analysis and mathematics</li>
+              <li>Nuclear Reactor Engineer, Texas Utilities, 1987–1990, developing numerical models of reactor physics</li>
+              <li>Nuclear Reactor Engineer, Westinghouse Electric Co., 1985, developing numerical models of reactor physics</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <Contact />
+
+    <p class="container pay">Existing client? <a href="https://www.LMNOeng.com/registerPay.htm">Make a consulting payment</a>.</p>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .band {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(1100px 520px at 85% -20%, #1d4a77 0%, transparent 60%), var(--ink);
+    color: #fff;
+    padding: 136px 0 88px;
+  }
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .band-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 64px;
+    align-items: end;
+  }
+  .crumbs {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--muted-light);
+  }
+  .crumbs a {
+    text-decoration: none;
+  }
+  .crumbs a:hover {
+    color: #fff;
+  }
+  h1 {
+    font-size: clamp(38px, 5vw, 60px);
+    margin-top: 16px;
+  }
+  .copy > p {
+    max-width: 620px;
+    margin-top: 18px;
+    font-size: 18px;
+    color: var(--muted-light);
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    margin: 0;
+    background: var(--line-dark);
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .stats > div {
+    background: var(--ink-2);
+    padding: 22px;
+  }
+  .stats dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 36px;
+    line-height: 1.15;
+    color: var(--water-2);
+  }
+  .stats dt {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--muted-light);
+  }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .method {
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #0b63b5;
+  }
+  .method h3 {
+    margin-top: 8px;
+    font-size: 23px;
+  }
+  .method > p {
+    margin-top: 10px;
+    color: var(--muted);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    align-content: flex-start;
+    min-height: 62px;
+    margin: 16px 0 20px;
+    padding: 0;
+  }
+  .chips li {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--water-soft);
+    color: #0b4f90;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .example {
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .example span {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .example p {
+    margin-top: 4px;
+    font-size: 15px;
+  }
+
+  .record {
+    background: var(--surface);
+    border-block: 1px solid var(--line);
+  }
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 460px;
+    height: 54px;
+    padding: 0 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+  }
+  .search:focus-within {
+    border-color: var(--water);
+    box-shadow: 0 0 0 3px rgba(31, 142, 241, 0.15);
+  }
+  .search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font: 16px var(--font-sans);
+    color: var(--text);
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .pills button {
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font: 500 14px var(--font-sans);
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+  .pills button:hover {
+    border-color: var(--water);
+  }
+  .pills small {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .pills button[aria-pressed='true'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .pills button[aria-pressed='true'] small {
+    color: var(--muted-light);
+  }
+  .count {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .ledger {
+    margin-top: 12px;
+  }
+  .year {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    border-top: 2px solid var(--ink);
+    padding-top: 12px;
+    margin-top: 28px;
+  }
+  .year h3 {
+    position: sticky;
+    top: 92px;
+    align-self: start;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  .year ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .year li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 24px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+  }
+  .year li:first-child {
+    border-top: 0;
+    padding-top: 2px;
+  }
+  .title {
+    font-size: 15.5px;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex: none;
+    max-width: 46%;
+    gap: 4px 12px;
+  }
+  .tags i {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .empty {
+    margin-top: 28px;
+    color: var(--muted);
+  }
+  .empty a {
+    color: #0b63b5;
+  }
+  .more {
+    margin-top: 28px;
+  }
+
+  .people-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .person {
+    padding: 28px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  .person header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 8px;
+  }
+  .person img,
+  .mono {
+    flex: none;
+    width: 84px;
+    height: 112px;
+    border-radius: 14px;
+    object-fit: cover;
+  }
+  .mono {
+    display: grid;
+    place-items: center;
+    background: var(--ink);
+    color: var(--water-2);
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+  }
+  .person h3 {
+    font-size: 24px;
+  }
+  .role {
+    margin-top: 6px;
+    color: var(--muted);
+  }
+  .person h4 {
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0b63b5;
+  }
+  .person ul {
+    display: grid;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 15px;
+  }
+  details {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  summary {
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  details ul {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .pay {
+    padding-block: 0 56px;
+    margin-top: -64px;
+    font-size: 14.5px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .pay a {
+    color: #0b63b5;
+  }
+
+  @media (max-width: 960px) {
+    .band-inner,
+    .people-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .method-grid {
+      grid-template-columns: 1fr;
+    }
+    .chips {
+      min-height: 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .year {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .year h3 {
+      position: static;
+    }
+    .year li {
+      flex-direction: column;
+      gap: 2px;
+    }
+    .tags {
+      justify-content: flex-start;
+      max-width: none;
+    }
+    .method,
+    .person {
+      padding: 22px;
+    }
+    .stats dd {
+      font-size: 30px;
+    }
+  }
+</style>
+
+<script>
+  const LIMIT = 30;
+  const search = document.querySelector<HTMLInputElement>('[data-search]')!;
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-project]')];
+  const years = [...document.querySelectorAll<HTMLElement>('[data-year]')];
+  const count = document.querySelector<HTMLElement>('[data-count]')!;
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const more = document.querySelector<HTMLButtonElement>('[data-more]')!;
+
+  let topic = '';
+  let expanded = false;
+
+  function render() {
+    const terms = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const filtering = Boolean(topic || terms.length);
+    let matches = 0;
+    for (const row of rows) {
+      const hit =
+        (!topic || row.dataset.tags!.split(' ').includes(topic)) &&
+        terms.every((t) => row.dataset.text!.includes(t));
+      if (hit) matches++;
+      row.hidden = !hit || (!filtering && !expanded && matches > LIMIT);
+    }
+    for (const year of years) {
+      year.hidden = !year.querySelector('[data-project]:not([hidden])');
+    }
+    const shown = rows.filter((r) => !r.hidden).length;
+    count.textContent = filtering
+      ? `${matches} of ${rows.length} projects`
+      : `Showing the ${shown === rows.length ? `full record of ${rows.length}` : `${shown} most recent of ${rows.length}`} projects`;
+    empty.hidden = matches > 0;
+    more.hidden = filtering || expanded;
+    more.textContent = `Show all ${rows.length} projects`;
+  }
+
+  search.addEventListener('input', render);
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      topic = button.dataset.filter!;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+      render();
+    });
+  }
+  more.addEventListener('click', () => {
+    expanded = true;
+    render();
+  });
+  render();
+</script>
